@@ -4,6 +4,13 @@ import numpy as np
 import Quandl as q
 
 def main():
+
+  # user should specify one argument only
+  if len(sys.argv) != 2:
+    print 'Usage: ./ticker_data.py INDEX_TICKER'
+    print 'Example: ./ticker_data.py NASDAQ_NFLX'
+    sys.exit()
+
   #auth token for akallu
   auth_token = 'DvtyfczL4jNaGzWwqRZ3'
   
