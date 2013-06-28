@@ -36,9 +36,10 @@ def load_data(filename):
     for line in f:
       vals = line.strip().split(',')
       #we ignore any days that have NaN entries
-      if not 'nan' in vals:
+      if (not 'nan' in vals) and len(line.strip()) > 1:
         #first entry is date string, leave it intact
-        vals = vals[0] + [float(val) for val in vals[1:]]
+        #also check for empty strings in vals
+        vals = [vals[0]] + [float(val) for val in vals[1:] if len(val) > 0]
         D.append(vals)
 
   return D
