@@ -20,9 +20,12 @@ RETURN:
 ''' 
 def generate_model(X, y, params=None, param_grid=None):
 
-  #if grid_params was not specified, let us specify them
-  if param_grid == None:
-    #grid space intentionally kept small for performance issues
+  # generate scaler so that we may scale any future test data
+  scaler = sk.preprocessing.StandardScaler().fit(X)
+
+  # if grid_params and params were not specified, let us specify grid_params
+  if param_grid == None and params == None:
+    # grid space intentionally kept small for performance issues
     C = [-1, 0, 1, 3]
     G = [-3, -1, 0, 1]
 
@@ -34,22 +37,39 @@ def generate_model(X, y, params=None, param_grid=None):
 	{'C': C, 'gamma': G, 'kernel': ['rbf']},
 	]
 
-  # generate scaler so that we may scale any future test data
-  scaler = sk.preprocessing.StandardScaler().fit(X)
+  # no params were specified, so perform grid search
+  if params == None:
+    # generate base model to pass to grid search
+    # here we use support vector regression for real valued classification
+    # cache_size is cache size in MB
+    base_model = sk.svm.SVR(cache_size=1000)
 
-  # generate base model to pass to grid search
-  # here we use support vector regression for real valued classification
-  base_model = sk.svm.SVR()
-
-  # load in model and params for grid search
-  # n_jobs=-1 tells it to run computations in parallel 
-  model = sk.grid_search.GridSearchCV(base_model, param_grid, n_jobs=-1)
+    # load in model and params for grid search
+    # n_jobs=-1 tells it to run computations in parallel 
+    model = sk.grid_search.GridSearchCV(base_model, param_grid, n_jobs=-1)
   
-  # fit our training data
-  model.fit(scaler.transform(X), y)
+    # fit our training data
+    model.fit(scaler.transform(X), y)
 
-  print 'Best parameters found:', model.best_params_
-  print 'Best score:', model.best_score_
+    print 'Best parameters found:', model.best_params_
+    print 'Best score:', model.best_score_
+  
+  # params were specified, so simply train model using these params
+  else:
+    #we set cache size to 1000 MB
+    if params['kernel'] == 'linear':
+      model = sk.svm.SVR(kernel='linear',
+			C=params['C'],
+			cache_size=1000)
+    elif params['kernel'] == 'rbf':
+      model = sk.svm.SVR(kernel='rbf',
+			C = params['C'],
+			gamma = params['gamma'],
+			cache_size = 1000)
+    else:
+      raise ValueError('Please specify kernel as either linear or rbf')
+      sys.exit()
+   
 
   return (model, scaler)
   
