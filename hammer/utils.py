@@ -3,6 +3,8 @@ import re
 import sys
 import cPickle as pickle
 import sklearn as sk
+from sklearn import preprocessing, svm, grid_search
+import numpy as np
 
 #gives day of the week in number form, 0 for sunday, 1 for monday, ...
 def day_of_week(year, month_num, day_num):
@@ -59,14 +61,16 @@ RETURN:
 	scaler object to scale (normalize) future test data
 ''' 
 def generate_model(X, y, params=None, param_grid=None):
+  X = np.asarray(X)
+  y = np.asarray(y)
 
   # generate scaler so that we may scale any future test data
-  scaler = sk.preprocessing.StandardScaler().fit(X)
+  scaler = preprocessing.StandardScaler().fit(X)
 
   # if grid_params and params were not specified, let us specify grid_params
   if param_grid == None and params == None:
     # grid space intentionally kept small for performance issues
-    C = [-1, 0, 1, 3]
+    C = [0, 1, 3]
     G = [-3, -1, 0, 1]
 
     C = [10**c for c in C]
@@ -82,11 +86,11 @@ def generate_model(X, y, params=None, param_grid=None):
     # generate base model to pass to grid search
     # here we use support vector regression for real valued classification
     # cache_size is cache size in MB
-    base_model = sk.svm.SVR(cache_size=1000)
+    base_model = svm.SVR(cache_size=1000)
 
     # load in model and params for grid search
     # n_jobs=-1 tells it to run computations in parallel 
-    model = sk.grid_search.GridSearchCV(base_model, param_grid, n_jobs=-1)
+    model = grid_search.GridSearchCV(base_model, param_grid)
   
     # fit our training data
     model.fit(scaler.transform(X), y)
@@ -98,11 +102,11 @@ def generate_model(X, y, params=None, param_grid=None):
   else:
     #we set cache size to 1000 MB
     if params['kernel'] == 'linear':
-      model = sk.svm.SVR(kernel='linear',
+      model = svm.SVR(kernel='linear',
 			C=params['C'],
 			cache_size=1000)
     elif params['kernel'] == 'rbf':
-      model = sk.svm.SVR(kernel='rbf',
+      model = svm.SVR(kernel='rbf',
 			C = params['C'],
 			gamma = params['gamma'],
 			cache_size = 1000)
@@ -139,7 +143,7 @@ def timestep_transform(D, k):
   for i in xrange(k, len(D)):
    
     year_, month_, day_ = parse_datestring(D[i][0])
-    X_i = [D[i-j][-2] / D[i-j-1][-2], D[i-j][-1] / D[i-j-1][-1] for j in xrange(1, k+1)] + [day_of_week(year_, month_, day_)]
+    X_i = [D[i-j][-2] / D[i-j-1][-2] for j in xrange(1, k+1)] + [D[i-j][-1] / D[i-j-1][-1] for j in xrange(1, k+1)]  + [day_of_week(year_, month_, day_)]
     y_i = D[i][-2] / D[i-1][-2]
     X.append(X_i)
     y.append(y_i)
