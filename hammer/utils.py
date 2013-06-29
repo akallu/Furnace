@@ -139,7 +139,7 @@ def timestep_transform(D, k):
   for i in xrange(k, len(D)):
    
     year_, month_, day_ = parse_datestring(D[i][0])
-    X_i = [D[i-j][-2] / D[i-j-1][-2] for j in xrange(1, k+1)] + [day_of_week(year_, month_, day_)]
+    X_i = [D[i-j][-2] / D[i-j-1][-2], D[i-j][-1] / D[i-j-1][-1] for j in xrange(1, k+1)] + [day_of_week(year_, month_, day_)]
     y_i = D[i][-2] / D[i-1][-2]
     X.append(X_i)
     y.append(y_i)
