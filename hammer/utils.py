@@ -113,6 +113,54 @@ def generate_model(X, y, params=None, param_grid=None):
   return (model, scaler)
 
 
+
+'''
+GIVEN:
+	raw data, D, given by quandl in form of:
+	    day_1 = [date_string_1, open_1, high_1, low_1, close_1, volume_1]
+					...
+					...
+					...
+	    day_n = [date_string_n, open_n, high_n, low_n, close_n, volume_n]
+
+	timeframe window limit, k
+
+RETURN:
+    transformed data, X and labels y in form:
+        X_k = [close_k-1 / close_k-2, ..., close_2 / close_1, day_of_week] y_k = close_k / close_k-1
+						...
+						...
+						...
+	X_n = [close_n-1 / close_n-2, ..., close_n-k+1 / close_n-k, day_of_week] y_n = close_n / close_n-1
+'''
+def timestep_transform(D, k):
+  X = []
+  y = []
+  for i in xrange(k, len(D)):
+   
+    year_, month_, day_ = parse_datestring(D[i][0])
+    X_i = [D[i-j][-2] / D[i-j-1][-2] for j in xrange(1, k+1)] + [day_of_week(year_, month_, day_)]
+    y_i = D[i][-2] / D[i-1][-2]
+    X.append(X_i)
+    y.append(y_i)
+
+  return (X, y)
+
+'''
+GIVEN:
+    date string, s, in form:
+      'YYYY-MM-DD'
+
+RETURN:
+    tuple of ints in form:
+      (year, month, day)
+    
+'''
+def parse_datestring(s):
+  s = s.strip().split('-')
+  return (int(s[0]), int(s[1]), int(s[2]))
+
+
 # Standard boilerplate to call the main() function.
 if __name__ == '__main__':
   main()
