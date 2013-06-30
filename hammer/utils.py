@@ -96,7 +96,7 @@ def generate_model(X, y, params=None, param_grid=None):
     model.fit(scaler.transform(X), y)
 
     print 'Best parameters found:', model.best_params_
-    print 'Best score:', model.best_score_
+    #print 'Best score:', model.best_score_
   
   # params were specified, so simply train model using these params
   else:
