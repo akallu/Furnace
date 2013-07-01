@@ -19,10 +19,10 @@ def main():
   date_str = str(today.year) + '_' + str(today.month) + '_' + str(today.day)
 
   with open('i30/daily_predictions/' + date_str + '.csv', 'w') as f:
-    f.write('TICKER_SYMBOL, PREV_CLOSE, NEXT_CLOSE, PROJECTED_CHANGE\n')
+    f.write('TICKER_SYMBOL, PREV_CLOSE, NEXT_CLOSE, PERCENT_PROJECTED_CHANGE\n')
     for t in symbols:
       p_close, change, n_close = next_day_prediction(t)
-      f.write(t + ', ' + str(p_close) + ', ' + str(n_close) + ', ' + str(change) + '\n')
+      f.write(t + ', ' + str(p_close) + ', ' + str(n_close) + ', ' + str(100*change) + '\n')
 
 def next_day_prediction(ticker_symbol):
   

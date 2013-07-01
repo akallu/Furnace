@@ -95,7 +95,7 @@ def generate_model(X, y, params=None, param_grid=None):
     # fit our training data
     model.fit(scaler.transform(X), y)
 
-    print 'Best parameters found:', model.best_params_
+    #print 'Best parameters found:', model.best_params_
     #print 'Best score:', model.best_score_
   
   # params were specified, so simply train model using these params
@@ -149,6 +149,19 @@ def timestep_transform(D, k):
     y.append(y_i)
 
   return (X, y)
+
+
+#essentially the same thing as timestep, but transforms the current day
+#into attributes for prediction purposes
+def day_transform(D, k):
+  #let i be the last element in D (the current day) 
+  i = len(D)-1
+
+  year_, month_, day_ = parse_datestring(D[i][0])
+  #print year_, month_, day_
+  x = [D[i-j][-2] / D[i-j-1][-2] for j in xrange(k)] + [D[i-j][-1] / D[i-j-1][-1] for j in xrange(k)]  + [day_of_week(year_, month_, day_)]
+
+  return x
 
 '''
 GIVEN:
