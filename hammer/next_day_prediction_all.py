@@ -1,12 +1,18 @@
 #!/usr/bin/python -tt
 import sys
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 import utils
 import sklearn as sk
 import math
 import datetime
 
 def main():
+
+  if len(sys.argv) == 1:
+    training_days = 365
+  else:
+    training_days = int(sys.argv[1])
+
   nsdq = ['AAPL', 'ALGN', 'ATML', 'CAR', 'CIEN', 'CTXS', 'GOOG', 'NFLX', 'SBGI',
         'SIRI', 'STX']
   nyse = ['APC', 'BC', 'BID', 'BKD', 'BX', 'CBG', 'DAN', 'DDD', 'FCX', 'FNP',
@@ -16,20 +22,20 @@ def main():
 
   today = datetime.date.today()
 
-  date_str = str(today.year) + '_' + str(today.month) + '_' + str(today.day)
+  date_str = str(today.year) + '_' + str(today.month) + '_' + str(today.day) + '_' + str(training_days)
 
   with open('i30/daily_predictions/' + date_str + '.csv', 'w') as f:
     f.write('TICKER_SYMBOL, PREV_CLOSE, NEXT_CLOSE, PERCENT_PROJECTED_CHANGE\n')
     for t in symbols:
-      p_close, change, n_close = next_day_prediction(t)
+      p_close, change, n_close = next_day_prediction(t, training_days)
       f.write(t + ', ' + str(p_close) + ', ' + str(n_close) + ', ' + str(100*change) + '\n')
 
-def next_day_prediction(ticker_symbol):
+def next_day_prediction(ticker_symbol, training_days):
   
   k = 10
   D = utils.load_data('i30/stocks/' + ticker_symbol + '.csv')
   #load in past year's data
-  train = D[-365:]
+  train = D[-1*training_days:]
 
   X_train, y_train = utils.timestep_transform(train, k)
   model, scaler = utils.generate_model(X_train, y_train)
