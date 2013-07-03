@@ -19,14 +19,17 @@ def main():
         'HIG', 'IPG', 'LYB', 'MGM', 'MS', 'OI', 'RCL', 'RF', 'THO', 'TPX', 'VLO']
 
   symbols = nsdq+nyse
+  symbols.sort()
+  print symbols
 
   today = datetime.date.today()
 
-  date_str = str(today.year) + '_' + str(today.month) + '_' + str(today.day) + '_' + str(training_days)
+  date_str = str(today.year) + '_' + str(today.month) + '_' + str(today.day) + '/' + str(training_days)
 
   with open('i30/daily_predictions/' + date_str + '.csv', 'w') as f:
     f.write('TICKER_SYMBOL, PREV_CLOSE, NEXT_CLOSE, PERCENT_PROJECTED_CHANGE\n')
     for t in symbols:
+      print 'Predicting', t + '...',
       p_close, change, n_close = next_day_prediction(t, training_days)
       f.write(t + ', ' + str(p_close) + ', ' + str(n_close) + ', ' + str(100*change) + '\n')
 
